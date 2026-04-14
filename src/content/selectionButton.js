@@ -1,16 +1,46 @@
 (function () {
   const BUTTON_ID = "quick-whatsapp-contact-selection-button";
   const PROCESS_SELECTION_MESSAGE = "quick-whatsapp-contact.process-selection";
+  const LANGUAGE_KEY = "quick-whatsapp-contact.language";
+
+  const TEXTS = {
+    "en-US": { actionWhatsapp: "Open in WhatsApp" },
+    "pt-BR": { actionWhatsapp: "Abrir no WhatsApp" }
+  };
 
   let selectedText = "";
   let buttonElement = null;
+  let language = "en-US";
+
+  initialize();
+
+  async function initialize() {
+    const result = await chrome.storage.sync.get(LANGUAGE_KEY);
+    language = normalizeLanguage(result[LANGUAGE_KEY]);
+
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName !== "sync" || !changes[LANGUAGE_KEY]) {
+        return;
+      }
+      language = normalizeLanguage(changes[LANGUAGE_KEY].newValue);
+      updateButtonText();
+    });
+
+    bindSelectionListeners();
+  }
+
+  function normalizeLanguage(value) {
+    return String(value || "").toLowerCase() === "pt-br" ? "pt-BR" : "en-US";
+  }
+
+  function getText(key) {
+    return (TEXTS[language] || TEXTS["en-US"])[key];
+  }
 
   function createButton() {
     const button = document.createElement("button");
     button.id = BUTTON_ID;
     button.type = "button";
-    button.title = "Chamar no WhatsApp";
-    button.setAttribute("aria-label", "Chamar no WhatsApp");
     button.style.position = "fixed";
     button.style.zIndex = "2147483647";
     button.style.width = "32px";
@@ -60,7 +90,17 @@
     });
 
     document.documentElement.appendChild(button);
+    updateButtonText();
     return button;
+  }
+
+  function updateButtonText() {
+    if (!buttonElement) {
+      return;
+    }
+    const label = getText("actionWhatsapp");
+    buttonElement.title = label;
+    buttonElement.setAttribute("aria-label", label);
   }
 
   function getButton() {
@@ -74,14 +114,6 @@
     const button = getButton();
     button.style.display = "none";
     selectedText = "";
-  }
-
-  function getSelectedText() {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) {
-      return "";
-    }
-    return selection.toString().trim();
   }
 
   function isLikelyPhoneSelection(text) {
@@ -131,21 +163,23 @@
     button.style.display = "flex";
   }
 
-  document.addEventListener("mouseup", () => {
-    window.setTimeout(showButtonNearSelection, 20);
-  });
+  function bindSelectionListeners() {
+    document.addEventListener("mouseup", () => {
+      window.setTimeout(showButtonNearSelection, 20);
+    });
 
-  document.addEventListener("keyup", () => {
-    window.setTimeout(showButtonNearSelection, 20);
-  });
+    document.addEventListener("keyup", () => {
+      window.setTimeout(showButtonNearSelection, 20);
+    });
 
-  document.addEventListener("mousedown", (event) => {
-    const button = getButton();
-    if (event.target !== button && !button.contains(event.target)) {
-      hideButton();
-    }
-  });
+    document.addEventListener("mousedown", (event) => {
+      const button = getButton();
+      if (event.target !== button && !button.contains(event.target)) {
+        hideButton();
+      }
+    });
 
-  document.addEventListener("scroll", hideButton, true);
-  window.addEventListener("blur", hideButton);
+    document.addEventListener("scroll", hideButton, true);
+    window.addEventListener("blur", hideButton);
+  }
 })();

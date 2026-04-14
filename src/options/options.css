@@ -1,0 +1,46 @@
+.options-shell {
+  max-width: 720px;
+  margin: 24px auto;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.option-row:last-child {
+  border-bottom: none;
+}
+
+.option-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.option-control {
+  min-width: 180px;
+}
+
+.option-control select {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+:root[data-theme="dark"] .option-control select {
+  background: #202a34;
+}
+
+.status-text {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+}

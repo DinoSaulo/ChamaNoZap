@@ -1,18 +1,25 @@
 import { COUNTRIES, DEFAULT_COUNTRY_CODE, getCountryByCode } from "../utils/countries.js";
+import { getMessages, t } from "../utils/i18n.js";
+import { detectCountryCodeFromBrowserLocation } from "../utils/location.js";
 import {
   buildWhatsAppUrl,
   getExpectedFormatsForDdi,
   hasCountryCode,
-  isValidPhoneForSend,
   isLocalNumberValidForDdi,
+  isValidPhoneForSend,
   joinCountryCodeAndNumber,
   normalizeSelectedNumber
 } from "../utils/phone.js";
-import { detectCountryCodeFromBrowserLocation } from "../utils/location.js";
-import { consumePendingContextNumber, getLastCountry, saveLastCountry } from "../utils/storage.js";
+import { consumePendingContextNumber, getLastCountry, getSettings, saveLastCountry } from "../utils/storage.js";
 
 class WhatsAppMessagePopup extends HTMLElement {
   async connectedCallback() {
+    const settings = await getSettings();
+    this.language = settings.language;
+    this.messages = getMessages(this.language);
+    document.documentElement.setAttribute("lang", this.language);
+    document.documentElement.dataset.theme = settings.darkModeEnabled ? "dark" : "light";
+
     this.pendingContextNumber = normalizeSelectedNumber(await consumePendingContextNumber());
     this.requiresCountrySelection = Boolean(this.pendingContextNumber);
     const storedCountry = await getLastCountry();
@@ -23,6 +30,7 @@ class WhatsAppMessagePopup extends HTMLElement {
     this.selectedCountryCode = this.requiresCountrySelection
       ? detectedCountry || DEFAULT_COUNTRY_CODE
       : storedCountry || detectedCountry || DEFAULT_COUNTRY_CODE;
+
     this.render();
     this.bindEvents();
   }
@@ -30,35 +38,40 @@ class WhatsAppMessagePopup extends HTMLElement {
   render() {
     const initialNumber = this.pendingContextNumber || "";
     const description = this.requiresCountrySelection
-      ? "Selecione o país para completar o DDI do número escolhido e abrir o WhatsApp."
-      : "Digite o número completo com DDI ou cole um contato para abrir o WhatsApp em uma nova aba.";
+      ? this.messages.popupDescriptionNeedsCountry
+      : this.messages.popupDescriptionDefault;
 
     this.innerHTML = `
       <main class="panel">
         <section class="card">
           <div class="card__content">
-            <div class="eyebrow">Quick WhatsApp Contact</div>
-            <h1 class="title">Enviar mensagem</h1>
+            <div class="eyebrow">${this.messages.popupEyebrow}</div>
+            <div class="title-row">
+              <h1 class="title">${this.messages.popupTitle}</h1>
+              <button class="button button--secondary button--small" type="button" id="open-settings">
+                ${this.messages.actionOpenSettings}
+              </button>
+            </div>
             <p class="description">${description}</p>
             <form id="message-form">
               <div class="field" ${this.requiresCountrySelection ? "" : "hidden"}>
-                <label for="country-hidden">Pais</label>
+                <label for="country-hidden">${this.messages.labelCountry}</label>
                 ${this.buildCountryPickerMarkup(this.selectedCountryCode)}
               </div>
               <div class="field">
-                <label for="phone">Número</label>
+                <label for="phone">${this.messages.labelPhone}</label>
                 <input id="phone" name="phone" type="text" value="${initialNumber}" placeholder="+5511999999999" required />
               </div>
               <div class="field">
-                <label for="message">Mensagem</label>
-                <textarea id="message" name="message" placeholder="Escreva sua mensagem"></textarea>
+                <label for="message">${this.messages.labelMessage}</label>
+                <textarea id="message" name="message" placeholder="${this.messages.labelMessage}"></textarea>
               </div>
               <div class="actions">
-                <button class="button button--primary" type="submit">Enviar</button>
+                <button class="button button--primary" type="submit">${this.messages.buttonSend}</button>
               </div>
             </form>
           </div>
-          <div class="preview">Toda ação abre o WhatsApp em uma nova aba.</div>
+          <div class="preview">${this.messages.previewTab}</div>
         </section>
       </main>
     `;
@@ -121,7 +134,7 @@ class WhatsAppMessagePopup extends HTMLElement {
     });
 
     optionButtons.forEach((button) => {
-      button.addEventListener("click", async () => {
+      button.addEventListener("click", () => {
         const code = button.getAttribute("data-country-code") ?? DEFAULT_COUNTRY_CODE;
         const selectedCountry = getCountryByCode(code);
         if (hiddenInput) {
@@ -152,6 +165,12 @@ class WhatsAppMessagePopup extends HTMLElement {
   bindEvents() {
     this.bindCountryPickerEvents();
 
+    const openSettingsButton = this.querySelector("#open-settings");
+    openSettingsButton?.addEventListener("click", async () => {
+      await chrome.runtime.openOptionsPage();
+      window.close();
+    });
+
     const form = this.querySelector("#message-form");
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -168,8 +187,13 @@ class WhatsAppMessagePopup extends HTMLElement {
         const expectedFormats = getExpectedFormatsForDdi(selectedCountry.dialCode);
         const localNumberIsValid = isLocalNumberValidForDdi(phone, selectedCountry.dialCode);
         if (!localNumberIsValid) {
-          const formatsLabel = expectedFormats.join(" ou ");
-          phoneInput?.setCustomValidity(`Formato invalido para +${selectedCountry.dialCode}. Use: ${formatsLabel}`);
+          const formatsLabel = expectedFormats.join(" / ");
+          phoneInput?.setCustomValidity(
+            t(this.messages, "validationInvalidFormat", {
+              ddi: selectedCountry.dialCode,
+              formats: formatsLabel
+            })
+          );
           phoneInput?.reportValidity();
           phoneInput?.focus();
           return;

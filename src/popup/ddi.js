@@ -1,17 +1,24 @@
 import { COUNTRIES, DEFAULT_COUNTRY_CODE, getCountryByCode } from "../utils/countries.js";
+import { getMessages, t } from "../utils/i18n.js";
+import { detectCountryCodeFromBrowserLocation } from "../utils/location.js";
 import {
   buildWhatsAppUrl,
   getExpectedFormatsForDdi,
-  isValidPhoneForSend,
   isLocalNumberValidForDdi,
+  isValidPhoneForSend,
   joinCountryCodeAndNumber,
   normalizeSelectedNumber
 } from "../utils/phone.js";
-import { detectCountryCodeFromBrowserLocation } from "../utils/location.js";
-import { getLastCountry, saveLastCountry } from "../utils/storage.js";
+import { getLastCountry, getSettings, saveLastCountry } from "../utils/storage.js";
 
 class CountryDdiScreen extends HTMLElement {
   async connectedCallback() {
+    const settings = await getSettings();
+    this.language = settings.language;
+    this.messages = getMessages(this.language);
+    document.documentElement.setAttribute("lang", this.language);
+    document.documentElement.dataset.theme = settings.darkModeEnabled ? "dark" : "light";
+
     this.initialNumber = this.getNumberFromQuery();
     this.selectedCountryCode = await this.resolveInitialCountry();
     this.render();
@@ -38,21 +45,21 @@ class CountryDdiScreen extends HTMLElement {
       <main class="panel">
         <section class="card">
           <div class="card__content">
-            <div class="eyebrow">Selecionar DDI</div>
-            <h1 class="title">Complete o número</h1>
-            <p class="description">O número selecionado não tinha código internacional. Escolha o país, revise o número e envie.</p>
+            <div class="eyebrow">${this.messages.ddiEyebrow}</div>
+            <h1 class="title">${this.messages.ddiTitle}</h1>
+            <p class="description">${this.messages.ddiDescription}</p>
             <form id="ddi-form">
               <div class="field">
-                <label for="country-hidden">Pais</label>
+                <label for="country-hidden">${this.messages.labelCountry}</label>
                 ${this.buildCountryPickerMarkup(this.selectedCountryCode)}
               </div>
               <div class="field">
-                <label for="local-number">Número</label>
+                <label for="local-number">${this.messages.labelPhone}</label>
                 <input id="local-number" name="local-number" type="text" value="${this.initialNumber}" required />
               </div>
               <div class="actions">
-                <button class="button button--primary" type="submit">Enviar</button>
-                <button class="button button--secondary" type="button" id="cancel">Cancelar</button>
+                <button class="button button--primary" type="submit">${this.messages.buttonSend}</button>
+                <button class="button button--secondary" type="button" id="cancel">${this.messages.buttonCancel}</button>
               </div>
             </form>
           </div>
@@ -163,16 +170,21 @@ class CountryDdiScreen extends HTMLElement {
       const country = this.getSelectedCountry();
       const localNumber = numberInput?.value ?? "";
       numberInput?.setCustomValidity("");
+
       if (!isLocalNumberValidForDdi(localNumber, country.dialCode)) {
-        const formats = getExpectedFormatsForDdi(country.dialCode).join(" ou ");
-        numberInput?.setCustomValidity(`Formato invalido para +${country.dialCode}. Use: ${formats}`);
+        const formats = getExpectedFormatsForDdi(country.dialCode).join(" / ");
+        numberInput?.setCustomValidity(
+          t(this.messages, "validationInvalidFormat", {
+            ddi: country.dialCode,
+            formats
+          })
+        );
         numberInput?.reportValidity();
         numberInput?.focus();
         return;
       }
 
       const phone = joinCountryCodeAndNumber(country.dialCode, localNumber);
-
       if (!isValidPhoneForSend(phone)) {
         numberInput?.focus();
         return;
@@ -185,11 +197,7 @@ class CountryDdiScreen extends HTMLElement {
       }
 
       await saveLastCountry(country.code);
-      await chrome.tabs.create({
-        url: whatsappUrl,
-        active: true
-      });
-
+      await chrome.tabs.create({ url: whatsappUrl, active: true });
       window.close();
     });
 
@@ -204,8 +212,8 @@ class CountryDdiScreen extends HTMLElement {
 
     if (preview) {
       preview.textContent = isValidPhoneForSend(fullNumber)
-        ? `Número final: +${fullNumber}`
-        : "Número final: informe um telefone valido";
+        ? t(this.messages, "previewFinalNumber", { number: fullNumber })
+        : this.messages.previewInvalidNumber;
     }
   }
 }

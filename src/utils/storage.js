@@ -1,5 +1,18 @@
 const LAST_COUNTRY_STORAGE_KEY = "quick-whatsapp-contact.last-country";
 const PENDING_CONTEXT_NUMBER_KEY = "quick-whatsapp-contact.pending-context-number";
+const AUTO_HIGHLIGHT_ENABLED_KEY = "quick-whatsapp-contact.auto-highlight-enabled";
+const DARK_MODE_ENABLED_KEY = "quick-whatsapp-contact.dark-mode-enabled";
+const LANGUAGE_KEY = "quick-whatsapp-contact.language";
+
+export const DEFAULT_SETTINGS = {
+  autoHighlightEnabled: true,
+  darkModeEnabled: false,
+  language: "en-US"
+};
+
+export function normalizeLanguage(language = "") {
+  return String(language || "").toLowerCase() === "pt-br" ? "pt-BR" : "en-US";
+}
 
 export async function saveLastCountry(countryCode) {
   await chrome.storage.sync.set({ [LAST_COUNTRY_STORAGE_KEY]: countryCode });
@@ -18,4 +31,71 @@ export async function consumePendingContextNumber() {
   const result = await chrome.storage.session.get(PENDING_CONTEXT_NUMBER_KEY);
   await chrome.storage.session.remove(PENDING_CONTEXT_NUMBER_KEY);
   return result[PENDING_CONTEXT_NUMBER_KEY] ?? "";
+}
+
+export async function getAutoHighlightEnabled() {
+  const result = await chrome.storage.sync.get(AUTO_HIGHLIGHT_ENABLED_KEY);
+  if (typeof result[AUTO_HIGHLIGHT_ENABLED_KEY] === "boolean") {
+    return result[AUTO_HIGHLIGHT_ENABLED_KEY];
+  }
+  return DEFAULT_SETTINGS.autoHighlightEnabled;
+}
+
+export async function setAutoHighlightEnabled(isEnabled) {
+  await chrome.storage.sync.set({ [AUTO_HIGHLIGHT_ENABLED_KEY]: Boolean(isEnabled) });
+}
+
+export async function getDarkModeEnabled() {
+  const result = await chrome.storage.sync.get(DARK_MODE_ENABLED_KEY);
+  if (typeof result[DARK_MODE_ENABLED_KEY] === "boolean") {
+    return result[DARK_MODE_ENABLED_KEY];
+  }
+  return DEFAULT_SETTINGS.darkModeEnabled;
+}
+
+export async function setDarkModeEnabled(isEnabled) {
+  await chrome.storage.sync.set({ [DARK_MODE_ENABLED_KEY]: Boolean(isEnabled) });
+}
+
+export async function getLanguage() {
+  const result = await chrome.storage.sync.get(LANGUAGE_KEY);
+  return normalizeLanguage(result[LANGUAGE_KEY] ?? DEFAULT_SETTINGS.language);
+}
+
+export async function setLanguage(language) {
+  await chrome.storage.sync.set({ [LANGUAGE_KEY]: normalizeLanguage(language) });
+}
+
+export async function getSettings() {
+  const result = await chrome.storage.sync.get([
+    AUTO_HIGHLIGHT_ENABLED_KEY,
+    DARK_MODE_ENABLED_KEY,
+    LANGUAGE_KEY
+  ]);
+
+  return {
+    autoHighlightEnabled:
+      typeof result[AUTO_HIGHLIGHT_ENABLED_KEY] === "boolean"
+        ? result[AUTO_HIGHLIGHT_ENABLED_KEY]
+        : DEFAULT_SETTINGS.autoHighlightEnabled,
+    darkModeEnabled:
+      typeof result[DARK_MODE_ENABLED_KEY] === "boolean"
+        ? result[DARK_MODE_ENABLED_KEY]
+        : DEFAULT_SETTINGS.darkModeEnabled,
+    language: normalizeLanguage(result[LANGUAGE_KEY] ?? DEFAULT_SETTINGS.language)
+  };
+}
+
+export async function saveSettings(settings = {}) {
+  await chrome.storage.sync.set({
+    [AUTO_HIGHLIGHT_ENABLED_KEY]:
+      typeof settings.autoHighlightEnabled === "boolean"
+        ? settings.autoHighlightEnabled
+        : DEFAULT_SETTINGS.autoHighlightEnabled,
+    [DARK_MODE_ENABLED_KEY]:
+      typeof settings.darkModeEnabled === "boolean"
+        ? settings.darkModeEnabled
+        : DEFAULT_SETTINGS.darkModeEnabled,
+    [LANGUAGE_KEY]: normalizeLanguage(settings.language ?? DEFAULT_SETTINGS.language)
+  });
 }

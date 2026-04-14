@@ -1,17 +1,69 @@
 (function () {
   const PROCESS_SELECTION_MESSAGE = "quick-whatsapp-contact.process-selection";
+  const AUTO_HIGHLIGHT_ENABLED_KEY = "quick-whatsapp-contact.auto-highlight-enabled";
+  const LANGUAGE_KEY = "quick-whatsapp-contact.language";
   const PHONE_MATCH_REGEX = /(?:\+?\d[\d().\s-]{6,}\d)/g;
   const MAX_TEXT_LENGTH = 1000;
   const ROOT_CLASS = "qwc-phone-root";
   const BUTTON_CLASS = "qwc-phone-action";
   const PHONE_TEXT_CLASS = "qwc-phone-text";
 
+  const TEXTS = {
+    "en-US": { actionWhatsapp: "Open in WhatsApp" },
+    "pt-BR": { actionWhatsapp: "Abrir no WhatsApp" }
+  };
+
+  let isEnabled = true;
+  let language = "en-US";
   let observer = null;
   let mutationTimer = null;
 
   injectStyles();
-  scanDocument();
-  attachObserver();
+  initialize();
+
+  async function initialize() {
+    const stored = await chrome.storage.sync.get([AUTO_HIGHLIGHT_ENABLED_KEY, LANGUAGE_KEY]);
+    isEnabled =
+      typeof stored[AUTO_HIGHLIGHT_ENABLED_KEY] === "boolean"
+        ? stored[AUTO_HIGHLIGHT_ENABLED_KEY]
+        : true;
+    language = normalizeLanguage(stored[LANGUAGE_KEY]);
+
+    if (isEnabled) {
+      scanDocument();
+      attachObserver();
+    }
+
+    chrome.storage.onChanged.addListener((changes, areaName) => {
+      if (areaName !== "sync") {
+        return;
+      }
+
+      if (changes[LANGUAGE_KEY]) {
+        language = normalizeLanguage(changes[LANGUAGE_KEY].newValue);
+        refreshButtonLabels();
+      }
+
+      if (changes[AUTO_HIGHLIGHT_ENABLED_KEY]) {
+        isEnabled = Boolean(changes[AUTO_HIGHLIGHT_ENABLED_KEY].newValue);
+        if (isEnabled) {
+          scanDocument();
+          attachObserver();
+        } else {
+          detachObserver();
+          clearHighlights();
+        }
+      }
+    });
+  }
+
+  function normalizeLanguage(value) {
+    return String(value || "").toLowerCase() === "pt-br" ? "pt-BR" : "en-US";
+  }
+
+  function getText(key) {
+    return (TEXTS[language] || TEXTS["en-US"])[key];
+  }
 
   function injectStyles() {
     if (document.getElementById("qwc-highlight-style")) {
@@ -60,9 +112,7 @@
 
       mutationTimer = window.setTimeout(() => {
         for (const mutation of mutations) {
-          mutation.addedNodes.forEach((addedNode) => {
-            processNode(addedNode);
-          });
+          mutation.addedNodes.forEach((addedNode) => processNode(addedNode));
         }
       }, 120);
     });
@@ -97,7 +147,7 @@
   }
 
   function processNode(node) {
-    if (!node) {
+    if (!isEnabled || !node) {
       return;
     }
 
@@ -185,8 +235,8 @@
     const button = document.createElement("button");
     button.type = "button";
     button.className = BUTTON_CLASS;
-    button.title = "Chamar no WhatsApp";
-    button.setAttribute("aria-label", "Chamar no WhatsApp");
+    button.title = getText("actionWhatsapp");
+    button.setAttribute("aria-label", getText("actionWhatsapp"));
 
     const icon = document.createElement("img");
     icon.src = chrome.runtime.getURL("icons/icon16.png");
@@ -205,6 +255,15 @@
     root.appendChild(text);
     root.appendChild(button);
     return root;
+  }
+
+  function refreshButtonLabels() {
+    const label = getText("actionWhatsapp");
+    const buttons = document.querySelectorAll(`.${BUTTON_CLASS}`);
+    buttons.forEach((button) => {
+      button.title = label;
+      button.setAttribute("aria-label", label);
+    });
   }
 
   function shouldSkipElement(element) {

@@ -12,7 +12,10 @@ Extensão de navegador em Manifest V3 para iniciar conversas no WhatsApp a parti
   - Se o número selecionado ja possui prefixo internacional com `+`, a extensão abre diretamente uma nova aba do WhatsApp.
   - Se o número não possui DDI, a extensão abre uma tela para escolha do país e composicao do número completo.
 - Popup da extensão com campo de número e textarea para mensagem.
-- Configuracao no popup para ativar/desativar o realce automatico de números na pagina.
+- Pagina de configuracoes dedicada para:
+- realce automatico de numeros na pagina (on/off);
+- dark mode (on/off);
+- idioma da extensao (EN-US ou PT-BR, padrao EN-US).
 - Persistencia do ultimo país selecionado usando `chrome.storage.sync`.
 - Testes unitarios para sanitização, validacao de DDI e concatenacao de número.
 
@@ -129,3 +132,4 @@ npm test
 - A detecção de DDI considera números que comecam com `+`.
 - A lista de países em `src/utils/countries.js` pode ser expandida facilmente.
 - O projeto foi estruturado para manter a logica de dominio desacoplada da interface, facilitando testes e evolucao.
+

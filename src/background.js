@@ -1,19 +1,24 @@
-import {
-  buildWhatsAppUrl,
-  hasCountryCode,
-  normalizeSelectedNumber
-} from "./utils/phone.js";
-import { setPendingContextNumber } from "./utils/storage.js";
+import { getMessages } from "./utils/i18n.js";
+import { buildWhatsAppUrl, hasCountryCode, normalizeSelectedNumber } from "./utils/phone.js";
+import { getLanguage, setPendingContextNumber } from "./utils/storage.js";
 
 const CONTEXT_MENU_ID = "quick-whatsapp-contact.send";
 const PROCESS_SELECTION_MESSAGE = "quick-whatsapp-contact.process-selection";
+const LANGUAGE_STORAGE_KEY = "quick-whatsapp-contact.language";
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: CONTEXT_MENU_ID,
-    title: "Chamar no WhatsApp",
-    contexts: ["selection"]
-  });
+chrome.runtime.onInstalled.addListener(async () => {
+  await refreshContextMenu();
+});
+
+chrome.runtime.onStartup.addListener(async () => {
+  await refreshContextMenu();
+});
+
+chrome.storage.onChanged.addListener(async (changes, areaName) => {
+  if (areaName !== "sync" || !changes[LANGUAGE_STORAGE_KEY]) {
+    return;
+  }
+  await refreshContextMenu();
 });
 
 chrome.contextMenus.onClicked.addListener(async (info) => {
@@ -35,6 +40,19 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 
   return true;
 });
+
+async function refreshContextMenu() {
+  const language = await getLanguage();
+  const messages = getMessages(language);
+  const title = messages.contextMenuCall;
+
+  await chrome.contextMenus.removeAll();
+  chrome.contextMenus.create({
+    id: CONTEXT_MENU_ID,
+    title,
+    contexts: ["selection"]
+  });
+}
 
 async function processSelection(selectionText) {
   const sanitizedNumber = normalizeSelectedNumber(selectionText);
