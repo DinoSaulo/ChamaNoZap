@@ -5,11 +5,14 @@ Extensao de navegador em Manifest V3 para iniciar conversas no WhatsApp a partir
 ## Funcionalidades
 
 - Menu de contexto com a acao `Chamar no WhatsApp` para numeros selecionados em qualquer pagina.
+- Botao flutuante ao selecionar um numero em pagina web, semelhante ao comportamento de extensoes como Google Translate.
+- Realce automatico opcional de numeros na pagina com icone do WhatsApp ao lado para abrir com um clique.
 - Sanitizacao automatica de numeros, removendo espacos, parenteses e tracos.
 - Deteccao de DDI:
   - Se o numero selecionado ja possui prefixo internacional com `+`, a extensao abre diretamente uma nova aba do WhatsApp.
   - Se o numero nao possui DDI, a extensao abre uma tela para escolha do pais e composicao do numero completo.
 - Popup da extensao com campo de numero e textarea para mensagem.
+- Configuracao no popup para ativar/desativar o realce automatico de numeros na pagina.
 - Persistencia do ultimo pais selecionado usando `chrome.storage.sync`.
 - Testes unitarios para sanitizacao, validacao de DDI e concatenacao de numero.
 

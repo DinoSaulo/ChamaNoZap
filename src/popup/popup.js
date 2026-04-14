@@ -9,12 +9,19 @@ import {
   normalizeSelectedNumber
 } from "../utils/phone.js";
 import { detectCountryCodeFromBrowserLocation } from "../utils/location.js";
-import { consumePendingContextNumber, getLastCountry, saveLastCountry } from "../utils/storage.js";
+import {
+  consumePendingContextNumber,
+  getAutoHighlightEnabled,
+  getLastCountry,
+  saveLastCountry,
+  setAutoHighlightEnabled
+} from "../utils/storage.js";
 
 class WhatsAppMessagePopup extends HTMLElement {
   async connectedCallback() {
     this.pendingContextNumber = normalizeSelectedNumber(await consumePendingContextNumber());
     this.requiresCountrySelection = Boolean(this.pendingContextNumber);
+    this.autoHighlightEnabled = await getAutoHighlightEnabled();
     const storedCountry = await getLastCountry();
     const detectedCountry = detectCountryCodeFromBrowserLocation({
       languages: navigator.languages,
@@ -52,6 +59,12 @@ class WhatsAppMessagePopup extends HTMLElement {
               <div class="field">
                 <label for="message">Mensagem</label>
                 <textarea id="message" name="message" placeholder="Escreva sua mensagem"></textarea>
+              </div>
+              <div class="field field--inline">
+                <label class="toggle">
+                  <input id="auto-highlight" type="checkbox" ${this.autoHighlightEnabled ? "checked" : ""} />
+                  <span>Realce automatico de numeros na pagina</span>
+                </label>
               </div>
               <div class="actions">
                 <button class="button button--primary" type="submit">Enviar</button>
@@ -151,6 +164,10 @@ class WhatsAppMessagePopup extends HTMLElement {
 
   bindEvents() {
     this.bindCountryPickerEvents();
+    const autoHighlightInput = this.querySelector("#auto-highlight");
+    autoHighlightInput?.addEventListener("change", async () => {
+      await setAutoHighlightEnabled(Boolean(autoHighlightInput.checked));
+    });
 
     const form = this.querySelector("#message-form");
     form?.addEventListener("submit", async (event) => {

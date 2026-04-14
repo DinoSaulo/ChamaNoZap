@@ -75,6 +75,10 @@ body {
   margin-bottom: 14px;
 }
 
+.field--inline {
+  margin-top: 4px;
+}
+
 .field label {
   font-size: 13px;
   font-weight: 700;
@@ -94,6 +98,19 @@ body {
 .field textarea {
   min-height: 110px;
   resize: vertical;
+}
+
+.toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.toggle input {
+  width: 16px;
+  height: 16px;
 }
 
 .country-picker {

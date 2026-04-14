@@ -21,9 +21,16 @@
     },
     "default_popup": "src/popup/popup.html"
   },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/autoHighlight.js", "src/content/selectionButton.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "web_accessible_resources": [
     {
-      "resources": ["src/popup/*"],
+      "resources": ["src/popup/*", "icons/*.png"],
       "matches": ["<all_urls>"]
     }
   ]

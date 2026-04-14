@@ -6,6 +6,7 @@ import {
 import { setPendingContextNumber } from "./utils/storage.js";
 
 const CONTEXT_MENU_ID = "quick-whatsapp-contact.send";
+const PROCESS_SELECTION_MESSAGE = "quick-whatsapp-contact.process-selection";
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
@@ -20,8 +21,23 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
     return;
   }
 
-  const sanitizedNumber = normalizeSelectedNumber(info.selectionText);
+  await processSelection(info.selectionText);
+});
 
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (!message || message.type !== PROCESS_SELECTION_MESSAGE) {
+    return;
+  }
+
+  processSelection(message.selectionText)
+    .then(() => sendResponse({ ok: true }))
+    .catch((error) => sendResponse({ ok: false, error: String(error) }));
+
+  return true;
+});
+
+async function processSelection(selectionText) {
+  const sanitizedNumber = normalizeSelectedNumber(selectionText);
   if (!sanitizedNumber) {
     return;
   }
@@ -38,7 +54,7 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
 
   await setPendingContextNumber(sanitizedNumber);
   await chrome.action.openPopup();
-});
+}
 
 async function openWhatsAppTab(url) {
   return chrome.tabs.create({ url, active: true });
