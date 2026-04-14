@@ -36,7 +36,7 @@ describe("storage utils", () => {
     vi.unstubAllGlobals();
   });
 
-  it("normalizeLanguage aplica en-US por padrao", () => {
+  it("normalizeLanguage aplica en-US por padrão", () => {
     expect(normalizeLanguage("pt-BR")).toBe("pt-BR");
     expect(normalizeLanguage("PT-BR")).toBe("pt-BR");
     expect(normalizeLanguage("de-DE")).toBe("en-US");
@@ -100,7 +100,7 @@ describe("storage utils", () => {
     });
   });
 
-  it("getLanguage usa en-US por padrao", async () => {
+  it("getLanguage usa en-US por padrão", async () => {
     chrome.storage.sync.get.mockResolvedValue({});
     const result = await getLanguage();
     expect(result).toBe("en-US");

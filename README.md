@@ -4,18 +4,18 @@ Extensão de navegador em Manifest V3 para iniciar conversas no WhatsApp a parti
 
 ## Funcionalidades
 
-- Menu de contexto com a ação `Chamar no WhatsApp` para números selecionados em qualquer pagina.
-- Botao flutuante ao selecionar um número em pagina web, semelhante ao comportamento de extensões como Google Translate.
-- Realce automatico opcional de números na pagina com icone do WhatsApp ao lado para abrir com um clique.
+- Menu de contexto com a ação `Chamar no WhatsApp` para números selecionados em qualquer página.
+- Botao flutuante ao selecionar um número em página web, semelhante ao comportamento de extensões como Google Translate.
+- Realce automatico opcional de números na página com icone do WhatsApp ao lado para abrir com um clique.
 - Sanitizacao automatica de números, removendo espacos, parenteses e tracos.
 - Deteccao de DDI:
   - Se o número selecionado ja possui prefixo internacional com `+`, a extensão abre diretamente uma nova aba do WhatsApp.
   - Se o número não possui DDI, a extensão abre uma tela para escolha do país e composicao do número completo.
 - Popup da extensão com campo de número e textarea para mensagem.
-- Pagina de configuracoes dedicada para:
-- realce automatico de numeros na pagina (on/off);
+- Página de configurações dedicada para:
+- realce automatico de números na página (on/off);
 - dark mode (on/off);
-- idioma da extensao (EN-US ou PT-BR, padrao EN-US).
+- idioma da extensão (EN-US ou PT-BR, padrão EN-US).
 - Persistencia do ultimo país selecionado usando `chrome.storage.sync`.
 - Testes unitarios para sanitização, validacao de DDI e concatenacao de número.
 
@@ -88,7 +88,7 @@ Abstracao para salvar e recuperar o ultimo país selecionado via `chrome.storage
 
 ### Fluxo 1: Menu de contexto
 
-1. Selecione um número em qualquer pagina web.
+1. Selecione um número em qualquer página web.
 2. Clique com o botão direito.
 3. Escolha `Chamar no WhatsApp`.
 4. Resultado:

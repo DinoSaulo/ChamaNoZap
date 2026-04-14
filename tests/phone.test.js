@@ -72,7 +72,7 @@ describe("phone utils", () => {
     );
   });
 
-  it("retorna string vazia quando o telefone e invalido", () => {
+  it("retorna string vazia quando o telefone e inválido", () => {
     expect(buildWhatsAppUrl("")).toBe("");
     expect(buildWhatsAppUrl("+")).toBe("");
     expect(buildWhatsAppUrl("55")).toBe("");

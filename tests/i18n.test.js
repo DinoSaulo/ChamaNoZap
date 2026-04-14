@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { getMessages, t } from "../src/utils/i18n.js";
 
 describe("i18n utils", () => {
-  it("retorna dicionario em ingles por padrao", () => {
+  it("retorna dicionário em inglês por padrão", () => {
     const messages = getMessages("unknown");
     expect(messages.popupTitle).toBe("Send message");
   });
 
-  it("retorna dicionario em portugues quando solicitado", () => {
+  it("retorna dicionário em português quando solicitado", () => {
     const messages = getMessages("pt-BR");
     expect(messages.popupTitle).toBe("Enviar mensagem");
   });
