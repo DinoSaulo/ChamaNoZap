@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Quick WhatsApp Contact",
+  "description": "Inicie conversas no WhatsApp a partir de numeros encontrados em paginas web.",
+  "version": "1.0.0",
+  "permissions": ["contextMenus", "tabs", "storage"],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Quick WhatsApp Contact",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    },
+    "default_popup": "src/popup/popup.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["src/popup/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

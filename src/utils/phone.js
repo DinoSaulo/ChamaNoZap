@@ -1,0 +1,80 @@
+import { PHONE_FORMAT_RULES_BY_DDI } from "./phoneFormats.js";
+
+export function sanitizePhoneNumber(value = "") {
+  return String(value).replace(/[^\d+]/g, "");
+}
+
+export function normalizeSelectedNumber(value = "") {
+  const sanitized = sanitizePhoneNumber(value).trim();
+
+  if (!sanitized) {
+    return "";
+  }
+
+  if (sanitized.startsWith("+")) {
+    return `+${sanitized.slice(1).replace(/\+/g, "")}`;
+  }
+
+  return sanitized.replace(/\+/g, "");
+}
+
+export function hasCountryCode(value = "") {
+  return normalizeSelectedNumber(value).startsWith("+");
+}
+
+function normalizeDialCode(dialCode = "") {
+  return String(dialCode).replace(/\D/g, "");
+}
+
+function formatMaskToRegex(formatMask) {
+  const normalizedMask = String(formatMask).replace(/[^X0-9]/g, "");
+  const regexSource = normalizedMask.replace(/X/g, "\\d");
+  return new RegExp(`^${regexSource}$`);
+}
+
+export function getExpectedFormatsForDdi(dialCode = "") {
+  const normalizedDialCode = normalizeDialCode(dialCode);
+  return PHONE_FORMAT_RULES_BY_DDI[normalizedDialCode] ?? [];
+}
+
+export function isLocalNumberValidForDdi(localNumber = "", dialCode = "") {
+  const expectedFormats = getExpectedFormatsForDdi(dialCode);
+  if (!expectedFormats.length) {
+    return true;
+  }
+
+  const localDigits = String(localNumber).replace(/\D/g, "");
+  return expectedFormats.some((formatMask) => formatMaskToRegex(formatMask).test(localDigits));
+}
+
+export function isValidPhoneForSend(phoneNumber, minimumDigits = 8) {
+  const normalizedNumber = normalizeSelectedNumber(phoneNumber).replace(/^\+/, "");
+  return /^\d+$/.test(normalizedNumber) && normalizedNumber.length >= minimumDigits;
+}
+
+export function joinCountryCodeAndNumber(countryDialCode, phoneNumber) {
+  const dialCode = String(countryDialCode).replace(/\D/g, "");
+  const normalizedNumber = normalizeSelectedNumber(phoneNumber).replace(/^\+/, "");
+
+  if (!normalizedNumber) {
+    return "";
+  }
+
+  return `${dialCode}${normalizedNumber}`;
+}
+
+export function buildWhatsAppUrl(phoneNumber, message = "") {
+  const normalizedNumber = normalizeSelectedNumber(phoneNumber).replace(/^\+/, "");
+  if (!isValidPhoneForSend(normalizedNumber)) {
+    return "";
+  }
+
+  const baseUrl = `https://wa.me/${normalizedNumber}`;
+  const trimmedMessage = message.trim();
+
+  if (!trimmedMessage) {
+    return baseUrl;
+  }
+
+  return `${baseUrl}?text=${encodeURIComponent(trimmedMessage)}`;
+}
