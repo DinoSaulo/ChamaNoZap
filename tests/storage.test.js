@@ -3,9 +3,7 @@ import {
   saveLastCountry,
   getLastCountry,
   setPendingContextNumber,
-  consumePendingContextNumber,
-  getAutoHighlightEnabled,
-  setAutoHighlightEnabled
+  consumePendingContextNumber
 } from "../src/utils/storage.js";
 
 describe("storage utils", () => {
@@ -28,14 +26,14 @@ describe("storage utils", () => {
     vi.unstubAllGlobals();
   });
 
-  it("saveLastCountry salva o pais no storage sync", async () => {
+  it("saveLastCountry salva o país no storage sync", async () => {
     await saveLastCountry("55");
     expect(chrome.storage.sync.set).toHaveBeenCalledWith({
       "quick-whatsapp-contact.last-country": "55"
     });
   });
 
-  it("getLastCountry retorna o pais do storage sync", async () => {
+  it("getLastCountry retorna o país do storage sync", async () => {
     chrome.storage.sync.get.mockResolvedValue({
       "quick-whatsapp-contact.last-country": "351"
     });
@@ -44,14 +42,14 @@ describe("storage utils", () => {
     expect(result).toBe("351");
   });
 
-  it("setPendingContextNumber salva o numero no storage session", async () => {
+  it("setPendingContextNumber salva o número no storage session", async () => {
     await setPendingContextNumber("11999999999");
     expect(chrome.storage.session.set).toHaveBeenCalledWith({
       "quick-whatsapp-contact.pending-context-number": "11999999999"
     });
   });
 
-  it("consumePendingContextNumber retorna e remove o numero do storage session", async () => {
+  it("consumePendingContextNumber retorna e remove o número do storage session", async () => {
     chrome.storage.session.get.mockResolvedValue({
       "quick-whatsapp-contact.pending-context-number": "11999999999"
     });
@@ -61,30 +59,9 @@ describe("storage utils", () => {
     expect(result).toBe("11999999999");
   });
 
-  it("consumePendingContextNumber retorna string vazia se nao houver numero", async () => {
+  it("consumePendingContextNumber retorna string vazia se não houver número", async () => {
     chrome.storage.session.get.mockResolvedValue({});
     const result = await consumePendingContextNumber();
     expect(result).toBe("");
-  });
-
-  it("getAutoHighlightEnabled retorna true por padrao se nao houver valor salvo", async () => {
-    chrome.storage.sync.get.mockResolvedValue({});
-    const result = await getAutoHighlightEnabled();
-    expect(result).toBe(true);
-  });
-
-  it("getAutoHighlightEnabled retorna o valor booleano salvo", async () => {
-    chrome.storage.sync.get.mockResolvedValue({
-      "quick-whatsapp-contact.auto-highlight-enabled": false
-    });
-    const result = await getAutoHighlightEnabled();
-    expect(result).toBe(false);
-  });
-
-  it("setAutoHighlightEnabled salva o booleano no storage sync", async () => {
-    await setAutoHighlightEnabled(false);
-    expect(chrome.storage.sync.set).toHaveBeenCalledWith({
-      "quick-whatsapp-contact.auto-highlight-enabled": false
-    });
   });
 });

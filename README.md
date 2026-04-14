@@ -1,20 +1,20 @@
 # Quick WhatsApp Contact
 
-Extensao de navegador em Manifest V3 para iniciar conversas no WhatsApp a partir de numeros encontrados em paginas web, com tratamento inteligente de DDI e interface de envio com mensagem personalizada.
+Extensão de navegador em Manifest V3 para iniciar conversas no WhatsApp a partir de números encontrados em paginas web, com tratamento inteligente de DDI e interface de envio com mensagem personalizada.
 
 ## Funcionalidades
 
-- Menu de contexto com a acao `Chamar no WhatsApp` para numeros selecionados em qualquer pagina.
-- Botao flutuante ao selecionar um numero em pagina web, semelhante ao comportamento de extensoes como Google Translate.
-- Realce automatico opcional de numeros na pagina com icone do WhatsApp ao lado para abrir com um clique.
-- Sanitizacao automatica de numeros, removendo espacos, parenteses e tracos.
+- Menu de contexto com a ação `Chamar no WhatsApp` para números selecionados em qualquer pagina.
+- Botao flutuante ao selecionar um número em pagina web, semelhante ao comportamento de extensões como Google Translate.
+- Realce automatico opcional de números na pagina com icone do WhatsApp ao lado para abrir com um clique.
+- Sanitizacao automatica de números, removendo espacos, parenteses e tracos.
 - Deteccao de DDI:
-  - Se o numero selecionado ja possui prefixo internacional com `+`, a extensao abre diretamente uma nova aba do WhatsApp.
-  - Se o numero nao possui DDI, a extensao abre uma tela para escolha do pais e composicao do numero completo.
-- Popup da extensao com campo de numero e textarea para mensagem.
-- Configuracao no popup para ativar/desativar o realce automatico de numeros na pagina.
-- Persistencia do ultimo pais selecionado usando `chrome.storage.sync`.
-- Testes unitarios para sanitizacao, validacao de DDI e concatenacao de numero.
+  - Se o número selecionado ja possui prefixo internacional com `+`, a extensão abre diretamente uma nova aba do WhatsApp.
+  - Se o número não possui DDI, a extensão abre uma tela para escolha do país e composicao do número completo.
+- Popup da extensão com campo de número e textarea para mensagem.
+- Configuracao no popup para ativar/desativar o realce automatico de números na pagina.
+- Persistencia do ultimo país selecionado usando `chrome.storage.sync`.
+- Testes unitarios para sanitização, validacao de DDI e concatenacao de número.
 
 ## Estrutura do projeto
 
@@ -47,34 +47,34 @@ Service worker do Manifest V3 responsavel por:
 
 - criar o item de menu de contexto;
 - ler o texto selecionado;
-- sanitizar o numero;
-- decidir se abre o WhatsApp diretamente ou a tela de selecao de DDI;
+- sanitizar o número;
+- decidir se abre o WhatsApp diretamente ou a tela de seleção de DDI;
 - abrir sempre uma nova aba com `chrome.tabs.create`.
 
 ### `src/utils/phone.js`
 
-Modulo com funcoes puras para:
+Modulo com funções puras para:
 
-- sanitizar numeros;
+- sanitizar números;
 - normalizar o prefixo `+`;
-- validar se o numero possui DDI;
-- concatenar DDI com numero local;
+- validar se o número possui DDI;
+- concatenar DDI com número local;
 - construir a URL final do WhatsApp.
 
 ### `src/popup/`
 
 Contem duas interfaces baseadas em Web Components:
 
-- `popup.html` / `popup.js`: popup principal da extensao para envio de mensagem com numero completo.
-- `ddi.html` / `ddi.js`: tela aberta em nova aba quando o numero selecionado nao possui DDI.
+- `popup.html` / `popup.js`: popup principal da extensão para envio de mensagem com número completo.
+- `ddi.html` / `ddi.js`: tela aberta em nova aba quando o número selecionado não possui DDI.
 
 ### `src/utils/storage.js`
 
-Abstracao para salvar e recuperar o ultimo pais selecionado via `chrome.storage.sync`.
+Abstracao para salvar e recuperar o ultimo país selecionado via `chrome.storage.sync`.
 
-## Como carregar a extensao localmente
+## Como carregar a extensão localmente
 
-1. Abra o Chrome ou um navegador compativel com extensoes MV3.
+1. Abra o Chrome ou um navegador compativel com extensões MV3.
 2. Acesse `chrome://extensions`.
 3. Ative o `Modo do desenvolvedor`.
 4. Clique em `Carregar sem compactacao`.
@@ -85,20 +85,20 @@ Abstracao para salvar e recuperar o ultimo pais selecionado via `chrome.storage.
 
 ### Fluxo 1: Menu de contexto
 
-1. Selecione um numero em qualquer pagina web.
-2. Clique com o botao direito.
+1. Selecione um número em qualquer pagina web.
+2. Clique com o botão direito.
 3. Escolha `Chamar no WhatsApp`.
 4. Resultado:
-   - Se o numero estiver no formato internacional com `+`, o WhatsApp abre diretamente em nova aba.
-   - Se o numero nao tiver DDI, o popup fixo da extensao (ancorado no icone da barra) sera aberto para escolha do pais e envio.
+   - Se o número estiver no formato internacional com `+`, o WhatsApp abre diretamente em nova aba.
+   - Se o número não tiver DDI, o popup fixo da extensão (ancorado no icone da barra) sera aberto para escolha do país e envio.
 
-### Fluxo 2: Popup da extensao
+### Fluxo 2: Popup da extensão
 
-1. Clique no icone da extensao.
-2. Informe o numero.
+1. Clique no icone da extensão.
+2. Informe o número.
 3. Opcionalmente, escreva uma mensagem.
 4. Clique em `Enviar`.
-5. O WhatsApp sera aberto em nova aba com o numero e a mensagem preenchidos.
+5. O WhatsApp sera aberto em nova aba com o número e a mensagem preenchidos.
 
 ## Executando os testes
 
@@ -119,13 +119,13 @@ npm test
 - Manifest V3 com service worker.
 - Uso de JavaScript ES Modules.
 - UI baseada em Web Components.
-- Sanitizacao de numeros antes de qualquer envio.
-- Abertura obrigatoria em nova aba para toda acao de envio.
-- Persistencia do ultimo pais selecionado.
+- Sanitizacao de números antes de qualquer envio.
+- Abertura obrigatória em nova aba para toda ação de envio.
+- Persistencia do ultimo país selecionado.
 - Testes unitarios para regras centrais de negocio.
 
 ## Observacoes
 
-- A deteccao de DDI considera numeros que comecam com `+`.
-- A lista de paises em `src/utils/countries.js` pode ser expandida facilmente.
+- A detecção de DDI considera números que comecam com `+`.
+- A lista de países em `src/utils/countries.js` pode ser expandida facilmente.
 - O projeto foi estruturado para manter a logica de dominio desacoplada da interface, facilitando testes e evolucao.

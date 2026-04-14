@@ -20,7 +20,7 @@ describe("browser location detection", () => {
     ).toBe("GB");
   });
 
-  it("usa fallback +1 (US) quando nao consegue identificar o pais", () => {
+  it("usa fallback +1 (US) quando não consegue identificar o país", () => {
     expect(
       detectCountryCodeFromBrowserLocation({
         languages: ["en"],

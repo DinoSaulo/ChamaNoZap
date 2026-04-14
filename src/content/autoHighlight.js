@@ -1,49 +1,17 @@
 (function () {
   const PROCESS_SELECTION_MESSAGE = "quick-whatsapp-contact.process-selection";
-  const AUTO_HIGHLIGHT_STORAGE_KEY = "quick-whatsapp-contact.auto-highlight-enabled";
   const PHONE_MATCH_REGEX = /(?:\+?\d[\d().\s-]{6,}\d)/g;
   const MAX_TEXT_LENGTH = 1000;
   const ROOT_CLASS = "qwc-phone-root";
   const BUTTON_CLASS = "qwc-phone-action";
   const PHONE_TEXT_CLASS = "qwc-phone-text";
 
-  let isEnabled = true;
   let observer = null;
   let mutationTimer = null;
 
   injectStyles();
-  initialize();
-
-  async function initialize() {
-    isEnabled = await readIsEnabled();
-    if (isEnabled) {
-      scanDocument();
-      attachObserver();
-    }
-
-    chrome.storage.onChanged.addListener((changes, areaName) => {
-      if (areaName !== "sync" || !changes[AUTO_HIGHLIGHT_STORAGE_KEY]) {
-        return;
-      }
-
-      isEnabled = Boolean(changes[AUTO_HIGHLIGHT_STORAGE_KEY].newValue);
-      if (isEnabled) {
-        scanDocument();
-        attachObserver();
-      } else {
-        detachObserver();
-        clearHighlights();
-      }
-    });
-  }
-
-  async function readIsEnabled() {
-    const result = await chrome.storage.sync.get(AUTO_HIGHLIGHT_STORAGE_KEY);
-    if (typeof result[AUTO_HIGHLIGHT_STORAGE_KEY] === "boolean") {
-      return result[AUTO_HIGHLIGHT_STORAGE_KEY];
-    }
-    return true;
-  }
+  scanDocument();
+  attachObserver();
 
   function injectStyles() {
     if (document.getElementById("qwc-highlight-style")) {
@@ -129,7 +97,7 @@
   }
 
   function processNode(node) {
-    if (!isEnabled || !node) {
+    if (!node) {
       return;
     }
 

@@ -9,19 +9,12 @@ import {
   normalizeSelectedNumber
 } from "../utils/phone.js";
 import { detectCountryCodeFromBrowserLocation } from "../utils/location.js";
-import {
-  consumePendingContextNumber,
-  getAutoHighlightEnabled,
-  getLastCountry,
-  saveLastCountry,
-  setAutoHighlightEnabled
-} from "../utils/storage.js";
+import { consumePendingContextNumber, getLastCountry, saveLastCountry } from "../utils/storage.js";
 
 class WhatsAppMessagePopup extends HTMLElement {
   async connectedCallback() {
     this.pendingContextNumber = normalizeSelectedNumber(await consumePendingContextNumber());
     this.requiresCountrySelection = Boolean(this.pendingContextNumber);
-    this.autoHighlightEnabled = await getAutoHighlightEnabled();
     const storedCountry = await getLastCountry();
     const detectedCountry = detectCountryCodeFromBrowserLocation({
       languages: navigator.languages,
@@ -37,8 +30,8 @@ class WhatsAppMessagePopup extends HTMLElement {
   render() {
     const initialNumber = this.pendingContextNumber || "";
     const description = this.requiresCountrySelection
-      ? "Selecione o pais para completar o DDI do numero escolhido e abrir o WhatsApp."
-      : "Digite o numero completo com DDI ou cole um contato para abrir o WhatsApp em uma nova aba.";
+      ? "Selecione o país para completar o DDI do número escolhido e abrir o WhatsApp."
+      : "Digite o número completo com DDI ou cole um contato para abrir o WhatsApp em uma nova aba.";
 
     this.innerHTML = `
       <main class="panel">
@@ -53,25 +46,19 @@ class WhatsAppMessagePopup extends HTMLElement {
                 ${this.buildCountryPickerMarkup(this.selectedCountryCode)}
               </div>
               <div class="field">
-                <label for="phone">Numero</label>
+                <label for="phone">Número</label>
                 <input id="phone" name="phone" type="text" value="${initialNumber}" placeholder="+5511999999999" required />
               </div>
               <div class="field">
                 <label for="message">Mensagem</label>
                 <textarea id="message" name="message" placeholder="Escreva sua mensagem"></textarea>
               </div>
-              <div class="field field--inline">
-                <label class="toggle">
-                  <input id="auto-highlight" type="checkbox" ${this.autoHighlightEnabled ? "checked" : ""} />
-                  <span>Realce automatico de numeros na pagina</span>
-                </label>
-              </div>
               <div class="actions">
                 <button class="button button--primary" type="submit">Enviar</button>
               </div>
             </form>
           </div>
-          <div class="preview">Toda acao abre o WhatsApp em uma nova aba.</div>
+          <div class="preview">Toda ação abre o WhatsApp em uma nova aba.</div>
         </section>
       </main>
     `;
@@ -164,10 +151,6 @@ class WhatsAppMessagePopup extends HTMLElement {
 
   bindEvents() {
     this.bindCountryPickerEvents();
-    const autoHighlightInput = this.querySelector("#auto-highlight");
-    autoHighlightInput?.addEventListener("change", async () => {
-      await setAutoHighlightEnabled(Boolean(autoHighlightInput.checked));
-    });
 
     const form = this.querySelector("#message-form");
     form?.addEventListener("submit", async (event) => {

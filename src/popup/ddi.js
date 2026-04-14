@@ -39,15 +39,15 @@ class CountryDdiScreen extends HTMLElement {
         <section class="card">
           <div class="card__content">
             <div class="eyebrow">Selecionar DDI</div>
-            <h1 class="title">Complete o numero</h1>
-            <p class="description">O numero selecionado nao tinha codigo internacional. Escolha o pais, revise o numero e envie.</p>
+            <h1 class="title">Complete o número</h1>
+            <p class="description">O número selecionado não tinha código internacional. Escolha o país, revise o número e envie.</p>
             <form id="ddi-form">
               <div class="field">
                 <label for="country-hidden">Pais</label>
                 ${this.buildCountryPickerMarkup(this.selectedCountryCode)}
               </div>
               <div class="field">
-                <label for="local-number">Numero</label>
+                <label for="local-number">Número</label>
                 <input id="local-number" name="local-number" type="text" value="${this.initialNumber}" required />
               </div>
               <div class="actions">
@@ -204,8 +204,8 @@ class CountryDdiScreen extends HTMLElement {
 
     if (preview) {
       preview.textContent = isValidPhoneForSend(fullNumber)
-        ? `Numero final: +${fullNumber}`
-        : "Numero final: informe um telefone valido";
+        ? `Número final: +${fullNumber}`
+        : "Número final: informe um telefone valido";
     }
   }
 }

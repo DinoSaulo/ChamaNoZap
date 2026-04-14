@@ -165,7 +165,7 @@ export const COUNTRIES = [
   country("NC", "NC", "Nova Caledonia", "687"),
   country("NZ", "NZ", "Nova Zelandia", "64"),
   country("OM", "OM", "Oma", "968"),
-  country("NL", "NL", "Paises Baixos", "31"),
+  country("NL", "NL", "Países Baixos", "31"),
   country("PW", "PW", "Palau", "680"),
   country("PA", "PA", "Panama", "507"),
   country("PG", "PG", "Papua-Nova Guine", "675"),

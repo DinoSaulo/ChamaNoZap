@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Quick WhatsApp Contact",
-  "description": "Inicie conversas no WhatsApp a partir de numeros encontrados em paginas web.",
+  "description": "Inicie conversas no WhatsApp a partir de números encontrados em paginas web.",
   "version": "1.0.0",
   "permissions": ["contextMenus", "tabs", "storage"],
   "background": {

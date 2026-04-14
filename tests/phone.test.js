@@ -19,16 +19,16 @@ describe("phone utils", () => {
     expect(normalizeSelectedNumber("++55 (11) 99999-8888")).toBe("+5511999998888");
   });
 
-  it("identifica quando o numero possui DDI", () => {
+  it("identifica quando o número possui DDI", () => {
     expect(hasCountryCode("+351912345678")).toBe(true);
     expect(hasCountryCode("11999998888")).toBe(false);
   });
 
-  it("concatena DDI com numero local sanitizado", () => {
+  it("concatena DDI com número local sanitizado", () => {
     expect(joinCountryCodeAndNumber("55", "(11) 99999-8888")).toBe("5511999998888");
   });
 
-  it("nao concatena quando o numero local esta vazio", () => {
+  it("não concatena quando o número local esta vazio", () => {
     expect(joinCountryCodeAndNumber("55", "   ")).toBe("");
   });
 
@@ -44,7 +44,7 @@ describe("phone utils", () => {
     expect(getExpectedFormatsForDdi("999")).toEqual([]);
   });
 
-  it("valida numero local com base no DDI selecionado", () => {
+  it("valida número local com base no DDI selecionado", () => {
     expect(isLocalNumberValidForDdi("91234-5678", "55")).toBe(true);
     expect(isLocalNumberValidForDdi("1234-5678", "55")).toBe(true);
     expect(isLocalNumberValidForDdi("2345-678", "55")).toBe(false);
@@ -58,7 +58,7 @@ describe("phone utils", () => {
     );
   });
 
-  it("monta a URL do WhatsApp sem query quando nao ha mensagem", () => {
+  it("monta a URL do WhatsApp sem query quando não ha mensagem", () => {
     expect(buildWhatsAppUrl("+55 (11) 99999-8888")).toBe("https://wa.me/5511999998888");
     expect(buildWhatsAppUrl("+55 (11) 99999-8888", "   ")).toBe("https://wa.me/5511999998888");
   });
