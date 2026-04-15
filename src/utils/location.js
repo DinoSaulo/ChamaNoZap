@@ -50,3 +50,30 @@ export function detectCountryCodeFromBrowserLocation(input = {}) {
 
   return DEFAULT_COUNTRY_CODE;
 }
+
+export function detectCountryCodeFromUrl(urlString) {
+  if (!urlString) {
+    return "";
+  }
+
+  try {
+    const url = new URL(urlString);
+    const hostname = url.hostname;
+    if (!hostname) {
+      return "";
+    }
+
+    const segments = hostname.split(".");
+    const tld = segments[segments.length - 1];
+    if (!tld || tld.length > 2) {
+      return "";
+    }
+
+    const region = normalizeRegion(tld);
+    const country = getCountryByIso2(region);
+    
+    return country?.code || "";
+  } catch {
+    return "";
+  }
+}

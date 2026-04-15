@@ -1,4 +1,4 @@
-import { detectCountryCodeFromBrowserLocation } from "../src/utils/location.js";
+import { detectCountryCodeFromBrowserLocation, detectCountryCodeFromUrl } from "../src/utils/location.js";
 import { describe, expect, it } from "vitest";
 
 describe("browser location detection", () => {
@@ -27,5 +27,27 @@ describe("browser location detection", () => {
         language: "en"
       })
     ).toBe("US");
+  });
+});
+
+describe("URL TLD detection", () => {
+  it("detects BR from .br and .com.br", () => {
+    expect(detectCountryCodeFromUrl("https://example.com.br/path")).toBe("BR");
+    expect(detectCountryCodeFromUrl("http://gov.br")).toBe("BR");
+  });
+
+  it("detects PT from .pt", () => {
+    expect(detectCountryCodeFromUrl("https://www.site.pt")).toBe("PT");
+  });
+
+  it("returns empty string for non-country specific TLDs like .com or .org", () => {
+    expect(detectCountryCodeFromUrl("https://google.com")).toBe("");
+    expect(detectCountryCodeFromUrl("https://wikipedia.org")).toBe("");
+  });
+
+  it("returns empty string for invalid URLs", () => {
+    expect(detectCountryCodeFromUrl("not-a-url")).toBe("");
+    expect(detectCountryCodeFromUrl("")).toBe("");
+    expect(detectCountryCodeFromUrl(null)).toBe("");
   });
 });

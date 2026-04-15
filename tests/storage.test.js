@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  consumePendingContextCountry,
   consumePendingContextNumber,
   DEFAULT_SETTINGS,
   getAutoHighlightEnabled,
@@ -13,6 +14,7 @@ import {
   setAutoHighlightEnabled,
   setDarkModeEnabled,
   setLanguage,
+  setPendingContextCountry,
   setPendingContextNumber
 } from "../src/utils/storage.js";
 
@@ -71,6 +73,22 @@ describe("storage utils", () => {
     expect(consumed).toBe("11999999999");
     expect(chrome.storage.session.remove).toHaveBeenCalledWith(
       "quick-whatsapp-contact.pending-context-number"
+    );
+  });
+
+  it("setPendingContextCountry e consumePendingContextCountry funcionam", async () => {
+    await setPendingContextCountry("PT");
+    expect(chrome.storage.session.set).toHaveBeenCalledWith({
+      "quick-whatsapp-contact.pending-context-country": "PT"
+    });
+
+    chrome.storage.session.get.mockResolvedValue({
+      "quick-whatsapp-contact.pending-context-country": "BR"
+    });
+    const consumed = await consumePendingContextCountry();
+    expect(consumed).toBe("BR");
+    expect(chrome.storage.session.remove).toHaveBeenCalledWith(
+      "quick-whatsapp-contact.pending-context-country"
     );
   });
 

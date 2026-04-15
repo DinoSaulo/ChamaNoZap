@@ -10,7 +10,7 @@ import {
   joinCountryCodeAndNumber,
   normalizeSelectedNumber
 } from "../utils/phone.js";
-import { consumePendingContextNumber, getLastCountry, getSettings, saveLastCountry } from "../utils/storage.js";
+import { consumePendingContextCountry, consumePendingContextNumber, getLastCountry, getSettings, saveLastCountry } from "../utils/storage.js";
 
 class WhatsAppMessagePopup extends HTMLElement {
   async connectedCallback() {
@@ -22,13 +22,14 @@ class WhatsAppMessagePopup extends HTMLElement {
 
     this.pendingContextNumber = normalizeSelectedNumber(await consumePendingContextNumber());
     this.requiresCountrySelection = Boolean(this.pendingContextNumber);
+    const contextCountry = await consumePendingContextCountry();
     const storedCountry = await getLastCountry();
     const detectedCountry = detectCountryCodeFromBrowserLocation({
       languages: navigator.languages,
       language: navigator.language
     });
     this.selectedCountryCode = this.requiresCountrySelection
-      ? detectedCountry || DEFAULT_COUNTRY_CODE
+      ? contextCountry || detectedCountry || DEFAULT_COUNTRY_CODE
       : storedCountry || detectedCountry || DEFAULT_COUNTRY_CODE;
 
     this.render();

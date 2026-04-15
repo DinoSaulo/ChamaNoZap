@@ -1,6 +1,7 @@
 import { getMessages } from "./utils/i18n.js";
+import { detectCountryCodeFromUrl } from "./utils/location.js";
 import { buildWhatsAppUrl, hasCountryCode, normalizeSelectedNumber } from "./utils/phone.js";
-import { getLanguage, setPendingContextNumber } from "./utils/storage.js";
+import { getLanguage, setPendingContextCountry, setPendingContextNumber } from "./utils/storage.js";
 
 const CONTEXT_MENU_ID = "quick-whatsapp-contact.send";
 const PROCESS_SELECTION_MESSAGE = "quick-whatsapp-contact.process-selection";
@@ -26,15 +27,15 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
     return;
   }
 
-  await processSelection(info.selectionText);
+  await processSelection(info.selectionText, info.pageUrl);
 });
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || message.type !== PROCESS_SELECTION_MESSAGE) {
     return;
   }
 
-  processSelection(message.selectionText)
+  processSelection(message.selectionText, sender.tab?.url)
     .then(() => sendResponse({ ok: true }))
     .catch((error) => sendResponse({ ok: false, error: String(error) }));
 
@@ -54,7 +55,7 @@ async function refreshContextMenu() {
   });
 }
 
-async function processSelection(selectionText) {
+async function processSelection(selectionText, urlString) {
   const sanitizedNumber = normalizeSelectedNumber(selectionText);
   if (!sanitizedNumber) {
     return;
@@ -68,6 +69,11 @@ async function processSelection(selectionText) {
 
     await openWhatsAppTab(url);
     return;
+  }
+
+  const detectedCountry = detectCountryCodeFromUrl(urlString);
+  if (detectedCountry) {
+    await setPendingContextCountry(detectedCountry);
   }
 
   await setPendingContextNumber(sanitizedNumber);

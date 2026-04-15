@@ -1,5 +1,6 @@
 const LAST_COUNTRY_STORAGE_KEY = "quick-whatsapp-contact.last-country";
 const PENDING_CONTEXT_NUMBER_KEY = "quick-whatsapp-contact.pending-context-number";
+const PENDING_CONTEXT_COUNTRY_KEY = "quick-whatsapp-contact.pending-context-country";
 const AUTO_HIGHLIGHT_ENABLED_KEY = "quick-whatsapp-contact.auto-highlight-enabled";
 const DARK_MODE_ENABLED_KEY = "quick-whatsapp-contact.dark-mode-enabled";
 const LANGUAGE_KEY = "quick-whatsapp-contact.language";
@@ -31,6 +32,16 @@ export async function consumePendingContextNumber() {
   const result = await chrome.storage.session.get(PENDING_CONTEXT_NUMBER_KEY);
   await chrome.storage.session.remove(PENDING_CONTEXT_NUMBER_KEY);
   return result[PENDING_CONTEXT_NUMBER_KEY] ?? "";
+}
+
+export async function setPendingContextCountry(countryCode) {
+  await chrome.storage.session.set({ [PENDING_CONTEXT_COUNTRY_KEY]: countryCode });
+}
+
+export async function consumePendingContextCountry() {
+  const result = await chrome.storage.session.get(PENDING_CONTEXT_COUNTRY_KEY);
+  await chrome.storage.session.remove(PENDING_CONTEXT_COUNTRY_KEY);
+  return result[PENDING_CONTEXT_COUNTRY_KEY] ?? "";
 }
 
 export async function getAutoHighlightEnabled() {
